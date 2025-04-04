@@ -1,12 +1,12 @@
 const { User } = require("../models");
-const bcrypt = require("bcrypt");
+const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
   const { username, password } = req.body;
   
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcryptjs.hash(password, 10);
     const newUser = await User.create({ username, password: hashedPassword });
 
     const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -27,7 +27,7 @@ exports.login = async (req, res) => {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await bcryptjs.compare(password, user.password);
 
     if (!validPassword) {
       return res.status(400).json({ message: "Mot de passe incorrect" });

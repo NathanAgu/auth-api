@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcryptjs = require("bcryptjs");
 const { User, Role, Permission } = require("../models");
 
 const initializeDatabase = async () => {
@@ -36,7 +36,7 @@ const initializeDatabase = async () => {
     // Créer un utilisateur admin
     const adminUser = await User.findOne({ where: { username: "admin" } });
     if (!adminUser) {
-      const hashedPassword = await bcrypt.hash("adminpassword", 10); // hash du mot de passe
+      const hashedPassword = await bcryptjs.hash("adminpassword", 10); // hash du mot de passe
       const user = await User.create({
         username: "admin",
         password: hashedPassword,
