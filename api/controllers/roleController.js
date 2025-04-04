@@ -86,3 +86,49 @@ exports.deleteRole = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error });
   }
 };
+
+exports.addPermissionToRole = async (req, res) => {
+  const { roleId, permissionSlug } = req.body;
+
+  try {
+    const role = await Role.findByPk(roleId);
+    if (!role) {
+      return res.status(404).json({ message: "Rôle non trouvé" });
+    }
+
+    const permission = await Permission.findOne({ where: { slug: permissionSlug } });
+    if (!permission) {
+      return res.status(404).json({ message: "Permission non trouvée" });
+    }
+
+    // Ajouter la permission au rôle
+    await role.addPermission(permission);
+    res.status(200).json({ message: `Permission ${permissionSlug} ajoutée au rôle` });
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de la permission au rôle", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
+exports.removePermissionFromRole = async (req, res) => {
+  const { roleId, permissionSlug } = req.body;
+
+  try {
+    const role = await Role.findByPk(roleId);
+    if (!role) {
+      return res.status(404).json({ message: "Rôle non trouvé" });
+    }
+
+    const permission = await Permission.findOne({ where: { slug: permissionSlug } });
+    if (!permission) {
+      return res.status(404).json({ message: "Permission non trouvée" });
+    }
+
+    // Retirer la permission du rôle
+    await role.removePermission(permission);
+    res.status(200).json({ message: `Permission ${permissionSlug} retirée du rôle` });
+  } catch (error) {
+    console.error("Erreur lors du retrait de la permission du rôle", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
