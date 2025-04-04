@@ -1,15 +1,15 @@
 const app = require("./app");
-const { sequelize } = require("./models");
+const database = require('./config/database');
 const initializeDatabase = require("./utils/initializeDatabase");
 
 const PORT = process.env.PORT || 3000;
 
 (async () => {
   try {
-    await sequelize.authenticate();
+    await database.authenticate();
     console.log("✅ Connexion à la BDD réussie");
 
-    await sequelize.sync({ alter: true });
+    await database.sync({ alter: true });
     console.log("📦 Modèles synchronisés");
 
     // Init données de base (admin, rôles, etc.)
