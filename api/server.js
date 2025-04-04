@@ -1,6 +1,6 @@
 const app = require("./app");
 const { sequelize } = require("./models");
-// const initializeRolesAndPermissions = require("./utils/initRoles");
+const initializeDatabase = require("./utils/initializeDatabase");
 
 const PORT = process.env.PORT || 3000;
 
@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
     console.log("📦 Modèles synchronisés");
 
     // Init données de base (admin, rôles, etc.)
-    // await initializeRolesAndPermissions();
+    await initializeDatabase();
 
     app.listen(PORT, () => {
       console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
