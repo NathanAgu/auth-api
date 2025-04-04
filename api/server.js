@@ -1,19 +1,25 @@
-require('dotenv').config();
-const express = require('express');
-const database = require('./config/database');
-const userRoutes = require('./routes/userRoutes');
+const app = require("./app");
+const { sequelize } = require("./models");
+// const initializeRolesAndPermissions = require("./utils/initRoles");
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use('/user', userRoutes);
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Connexion à la BDD réussie");
 
-database.sync()
-    .then(() => {
-        console.log('Database connected successfully!');
-        app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
-    })
-    .catch((error) => {
-        console.error('Unable to connect to the database:', error);
+    await sequelize.sync({ alter: true });
+    console.log("📦 Modèles synchronisés");
+
+    // Init données de base (admin, rôles, etc.)
+    // await initializeRolesAndPermissions();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
     });
+  } catch (error) {
+    console.error("❌ Erreur lors du démarrage :", error);
+    process.exit(1);
+  }
+})();
