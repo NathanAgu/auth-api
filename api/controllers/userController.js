@@ -15,7 +15,14 @@ exports.getUser = async (req, res) => {
   const { id } = req.params;
   
   try {
-    const user = await User.findByPk(id);
+    const user = await User.findByPk(id,
+      {
+        include: {
+          model: Role,
+          through: { attributes: [] } // Exclure les attributs de la table de jointure
+        }
+      }
+    );
 
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" });

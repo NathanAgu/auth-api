@@ -1,27 +1,28 @@
-const { DataTypes } = require("sequelize");
-
-module.exports = (sequelize) => {
+module.exports = (sequelize, DataTypes) => {
   const Role = sequelize.define("Role", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
+      primaryKey: true
     },
     name: {
       type: DataTypes.STRING,
-      unique: true,
       allowNull: false,
-    },
+      unique: true
+    }
   });
 
-  Role.associate = models => {
+  Role.associate = (models) => {
     Role.belongsToMany(models.User, {
-      through: 'UserRoles',
+      through: "UserRoles",
+      foreignKey: "roleId",
+      otherKey: "userId"
     });
+
     Role.belongsToMany(models.Permission, {
       through: "RolePermissions",
       foreignKey: "roleId",
-      otherKey: "permissionId",
+      otherKey: "permissionId"
     });
   };
 
