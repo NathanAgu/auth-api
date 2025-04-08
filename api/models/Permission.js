@@ -18,5 +18,11 @@ module.exports = (sequelize) => {
     },
   });
 
+  Permission.associate = (models) => {
+    Permission.belongsToMany(models.Role, {
+      through: "RolePermissions",
+    });
+  };
+
   return Permission;
 };

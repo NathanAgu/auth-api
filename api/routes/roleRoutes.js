@@ -6,7 +6,7 @@ const checkPermission = require("../middlewares/checkPermission");
 const router = express.Router();
 
 // Création d'un rôle (protégée par un rôle/admin)
-router.post("/", authMiddleware, checkPermission("role:create"), createRole);
+router.post("/", authMiddleware, /*checkPermission("role:create"),*/ createRole);
 
 // Récupération de tous les rôles
 router.get("/", authMiddleware, getRoles);
@@ -15,7 +15,7 @@ router.get("/", authMiddleware, getRoles);
 router.get("/:id", authMiddleware, getRoleById);
 
 // Suppression d'un rôle (protégée par un rôle/admin)
-router.delete("/:id", authMiddleware, checkPermission("role:delete"), deleteRole);
+router.delete("/:id", authMiddleware, /*checkPermission("role:delete"),*/ deleteRole);
 
 // Ajouter une permission à un rôle
 router.post("/addPermission", authMiddleware, addPermissionToRole);

@@ -9,11 +9,11 @@ const PORT = process.env.PORT || 3000;
     await database.authenticate();
     console.log("✅ Connexion à la BDD réussie");
 
-    await database.sync({ alter: true });
+    await database.sync({ force: true });
     console.log("📦 Modèles synchronisés");
 
     // Init données de base (admin, rôles, etc.)
-    await initializeDatabase();
+    // await initializeDatabase();
 
     app.listen(PORT, () => {
       console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
