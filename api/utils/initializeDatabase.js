@@ -1,55 +1,52 @@
-const bcryptjs = require("bcryptjs");
 const { User, Role, Permission } = require("../models");
 
 const initializeDatabase = async () => {
   try {
-    // Créer les permissions de base
-    const permissions = [
-      { slug: "user:create", description: "Permet de créer un utilisateur" },
-      { slug: "user:delete", description: "Permet de supprimer un utilisateur" },
-      { slug: "role:create", description: "Permet de créer un rôle" },
-      { slug: "role:delete", description: "Permet de supprimer un rôle" },
-      { slug: "permission:create", description: "Permet de créer une permission" },
-      { slug: "permission:delete", description: "Permet de supprimer une permission" },
-    ];
+    // === 1. Créer toutes les permissions ===
+    const tables = ["users", "roles", "permissions"];
+    const actions = ["create", "update", "delete"];
 
-    // Vérifier si les permissions existent déjà, sinon les créer
+    const permissionsData = tables.flatMap((table) =>
+      actions.map((action) => ({
+        slug: `${table}:${action}`,
+        description: `Permet de ${action} une entrée dans ${table}`
+      }))
+    );
+
     const existingPermissions = await Permission.findAll();
     if (existingPermissions.length === 0) {
-      await Permission.bulkCreate(permissions);
-      console.log("Permissions de base créées");
+      await Permission.bulkCreate(permissionsData);
+      console.log("✅ Permissions créées");
     }
 
-    // Créer les rôles de base
-    const roles = [
-      { name: "admin" },
-      { name: "user" },
-    ];
-
-    // Vérifier si les rôles existent déjà, sinon les créer
-    const existingRoles = await Role.findAll();
-    if (existingRoles.length === 0) {
-      await Role.bulkCreate(roles);
-      console.log("Rôles de base créés");
+    // === 2. Créer le rôle admin ===
+    let adminRole = await Role.findOne({ where: { name: "admin" } });
+    if (!adminRole) {
+      adminRole = await Role.create({ name: "admin" });
+      console.log("✅ Rôle admin créé");
     }
 
-    // Créer un utilisateur admin
-    const adminUser = await User.findOne({ where: { username: "admin" } });
+    // Associer toutes les permissions au rôle admin
+    const allPermissions = await Permission.findAll();
+    await adminRole.setPermissions(allPermissions); // Remplace les permissions existantes
+    console.log("🔗 Permissions associées au rôle admin");
+
+    // === 3. Créer l'utilisateur admin ===
+    let adminUser = await User.findOne({ where: { username: "admin" } });
     if (!adminUser) {
-      const hashedPassword = await bcryptjs.hash("adminpassword", 10); // hash du mot de passe
-      const user = await User.create({
+      adminUser = await User.create({
         username: "admin",
-        password: hashedPassword,
+        password: "adminPassword",
       });
-
-      // Assigner le rôle "admin" à l'utilisateur admin
-      const adminRole = await Role.findOne({ where: { name: "admin" } });
-      await user.addRole(adminRole);
-
-      console.log("Utilisateur admin créé avec le rôle 'admin'");
+      console.log("👤 Utilisateur admin créé");
     }
+
+    // Associer le rôle admin à l'utilisateur
+    await adminUser.setRoles([adminRole]);
+    console.log("🔗 Rôle admin associé à l'utilisateur admin");
+
   } catch (error) {
-    console.error("Erreur lors de l'initialisation de la base de données", error);
+    console.error("❌ Erreur lors de l'initialisation de la base de données :", error);
   }
 };
 
