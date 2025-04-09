@@ -69,6 +69,36 @@ exports.getRoleById = async (req, res) => {
   }
 };
 
+exports.updateRole = async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+
+  try {
+    const role = await Role.findByPk(id);
+
+    if (!role) {
+      return res.status(404).json({ message: "Rôle non trouvé" });
+    }
+
+    // Vérifie si un autre rôle avec le même nom existe déjà
+    if (name) {
+      const existingRole = await Role.findOne({ where: { name } });
+      if (existingRole && existingRole.id !== role.id) {
+        return res.status(400).json({ message: "Ce nom de rôle est déjà utilisé" });
+      }
+      role.name = name;
+    }
+
+    await role.save();
+
+    res.status(200).json({ message: "Rôle mis à jour", role });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du rôle", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
+
 exports.deleteRole = async (req, res) => {
   const { id } = req.params;
 
