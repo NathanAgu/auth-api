@@ -47,6 +47,30 @@ exports.getPermissionById = async (req, res) => {
   }
 };
 
+exports.updatePermission = async (req, res) => {
+  const { id } = req.params;
+  const { slug, description } = req.body;
+
+  try {
+    const permission = await Permission.findByPk(id);
+
+    if (!permission) {
+      return res.status(404).json({ message: "Permission non trouvée" });
+    }
+
+    // Mise à jour des champs
+    if (slug) permission.slug = slug;
+    if (description) permission.description = description;
+
+    await permission.save();
+
+    res.status(200).json({ message: "Permission mise à jour", permission });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de la permission", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
 exports.deletePermission = async (req, res) => {
   const { id } = req.params;
 
