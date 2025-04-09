@@ -19,7 +19,13 @@ exports.getUser = async (req, res) => {
       {
         include: {
           model: Role,
-          through: { attributes: [] } // Exclure les attributs de la table de jointure
+          through: { attributes: [] },
+          include: [
+            {
+              model: Permission,
+              through: { attributes: [] },
+            },
+          ]
         }
       }
     );
