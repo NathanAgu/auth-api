@@ -1,5 +1,5 @@
 const express = require("express");
-const { createPermission, getPermissions, getPermissionById, deletePermission } = require("../controllers/permissionController");
+const { createPermission, getPermissions, getPermissionById, updatePermission, deletePermission } = require("../controllers/permissionController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const checkPermission = require("../middlewares/checkPermission");
 
@@ -15,7 +15,7 @@ router.get("/", authMiddleware, getPermissions);
 router.get("/:id", authMiddleware, getPermissionById);
 
 // Mise à jour d'une permission (protégée par un rôle/admin)
-router.put("/:id", permissionController.updatePermission);
+router.put("/:id", updatePermission);
 
 // Suppression d'une permission (protégée par un rôle/admin)
 router.delete("/:id", authMiddleware, /*checkPermission("permission:delete"),*/ deletePermission);
