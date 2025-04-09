@@ -40,6 +40,62 @@ exports.getUser = async (req, res) => {
   }
 };
 
+exports.updateUserInfo = async (req, res) => {
+  const { id } = req.params;
+  const { username } = req.body;
+
+  try {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    // Vérifie si le nouveau nom d'utilisateur existe déjà
+    if (username) {
+      const existingUser = await User.findOne({ where: { username } });
+      if (existingUser && existingUser.id !== user.id) {
+        return res.status(400).json({ message: "Nom d'utilisateur déjà utilisé" });
+      }
+
+      user.username = username;
+    }
+
+    await user.save();
+
+    res.status(200).json({ message: "Utilisateur mis à jour", user });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'utilisateur", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
+exports.updateUserPassword = async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ message: "Mot de passe requis" });
+  }
+
+  try {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    user.password = password;
+    await user.save();
+
+    res.status(200).json({ message: "Mot de passe mis à jour avec succès" });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du mot de passe", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
+
 exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   
