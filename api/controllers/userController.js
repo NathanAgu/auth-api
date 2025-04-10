@@ -19,14 +19,9 @@ exports.getUser = async (req, res) => {
       {
         include: {
           model: Role,
-          through: { attributes: [] },
-          include: [
-            {
-              model: Permission,
-              through: { attributes: [] },
-            },
-          ]
-        }
+          through: { attributes: [] }
+        },
+        attributes: { exclude: ['password'] }
       }
     );
 
