@@ -3,8 +3,9 @@ const { User, Role } = require("../models");
 exports.createUser = async (req, res) => {
   const { username, password } = req.body;
   
+  const hashedPassword = await bcryptjs.hash(password, 10);
   try {
-    const newUser = await User.create({ username, password });
+    const newUser = await User.create({ username, hashedPassword });
     res.status(201).json(newUser);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la création de l'utilisateur", error });
@@ -73,6 +74,8 @@ exports.updateUserPassword = async (req, res) => {
     return res.status(400).json({ message: "Mot de passe requis" });
   }
 
+  const hashedPassword = await bcryptjs.hash(password, 10);
+
   try {
     const user = await User.findByPk(id);
 
@@ -80,7 +83,7 @@ exports.updateUserPassword = async (req, res) => {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
-    user.password = password;
+    user.password = hashedPassword;
     await user.save();
 
     res.status(200).json({ message: "Mot de passe mis à jour avec succès" });
@@ -145,7 +148,7 @@ exports.removeRoleFromUser = async (req, res) => {
       return res.status(404).json({ message: "Rôle non trouvé" });
     }
 
-    // Retirer le rôle de l'utilisateur
+
     await user.removeRole(role);
     res.status(200).json({ message: `Rôle ${roleName} retiré de l'utilisateur` });
   } catch (error) {
