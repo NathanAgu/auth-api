@@ -1,4 +1,5 @@
 const { User, Role, Permission } = require("../models");
+const bcryptjs = require("bcryptjs");
 
 const initializeDatabase = async () => {
   try {
