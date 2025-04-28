@@ -1,25 +1,63 @@
+/**
+ * Point d'entrée du serveur
+ * @module Server
+ */
+
 const app = require("./app");
 const database = require('./config/database');
 const initializeDatabase = require("./utils/initializeDatabase");
+const logger = require("./utils/logger");
 
+// Configuration
 const PORT = process.env.PORT || 3000;
+const ENV = process.env.NODE_ENV || 'development';
 
-(async () => {
-  try {
+/**
+ * Initialise la base de données
+ * @async
+ * @returns {Promise<void>}
+ */
+async function initDatabase() {
     await database.authenticate();
-    console.log("✅ Connexion à la BDD réussie");
+    logger.info("✅ Connexion à la BDD réussie");
 
-    await database.sync({ force: true });
-    console.log("📦 Modèles synchronisés");
+    await database.sync({ force: process.env.RESET_DB === 'true' });
+    logger.info("📦 Modèles synchronisés");
 
-    // Init données de base (admin, rôles, etc.)
     await initializeDatabase();
+    logger.info("🔧 Données initiales chargées");
+}
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("❌ Erreur lors du démarrage :", error);
+/**
+ * Démarre le serveur
+ * @async
+ * @returns {Promise<void>}
+ */
+async function startServer() {
+    try {
+        await initDatabase();
+
+        app.listen(PORT, () => {
+            logger.info(`🚀 Serveur ${ENV} lancé sur http://localhost:${PORT}`);
+        });
+    } catch (error) {
+        logger.error("❌ Erreur lors du démarrage :", error);
+        process.exit(1);
+    }
+}
+
+// Gestion des erreurs non capturées
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Promesse non gérée rejetée:', reason);
+    // Application des procédures de nettoyage
     process.exit(1);
-  }
-})();
+});
+
+process.on('uncaughtException', (error) => {
+    logger.error('Exception non capturée:', error);
+    // Application des procédures de nettoyage
+    process.exit(1);
+});
+
+// Démarrage du serveur
+startServer();
