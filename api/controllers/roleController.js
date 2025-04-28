@@ -1,26 +1,30 @@
 const { Role, Permission } = require("../models");
 
+/**
+ * Crée un nouveau rôle avec des permissions optionnelles
+ * @param {Object} req.body - Les données du rôle
+ * @param {string} req.body.name - Le nom du rôle
+ * @param {string[]} [req.body.permissions] - Liste des slugs des permissions à associer
+ * @returns {Object} Le rôle créé
+ */
 exports.createRole = async (req, res) => {
-  const { name, permissions } = req.body; // 'permissions' serait un tableau des slugs des permissions
+  const { name, permissions } = req.body;
   
   try {
-    // Vérifie si le rôle existe déjà
     const existingRole = await Role.findOne({ where: { name } });
     if (existingRole) {
       return res.status(400).json({ message: "Le rôle existe déjà" });
     }
 
-    // Crée le rôle
     const newRole = await Role.create({ name });
 
-    // Si des permissions sont envoyées, associe-les au rôle
     if (permissions && permissions.length > 0) {
       const perms = await Permission.findAll({
         where: {
           slug: permissions,
         },
       });
-      await newRole.addPermissions(perms); // Ajoute les permissions au rôle
+      await newRole.addPermissions(perms);
     }
 
     res.status(201).json(newRole);
@@ -30,13 +34,72 @@ exports.createRole = async (req, res) => {
   }
 };
 
+/**
+ * Ajoute une permission à un rôle
+ * @param {Object} req.body - Les données de l'association
+ * @param {string} req.body.roleId - L'ID du rôle
+ * @param {string} req.body.permissionSlug - Le slug de la permission à ajouter
+ */
+exports.addPermissionToRole = async (req, res) => {
+  const { roleId, permissionSlug } = req.body;
+
+  try {
+    const role = await Role.findByPk(roleId);
+    if (!role) {
+      return res.status(404).json({ message: "Rôle non trouvé" });
+    }
+
+    const permission = await Permission.findOne({ where: { slug: permissionSlug } });
+    if (!permission) {
+      return res.status(404).json({ message: "Permission non trouvée" });
+    }
+
+    await role.addPermission(permission);
+    res.status(200).json({ message: `Permission ${permissionSlug} ajoutée au rôle` });
+  } catch (error) {
+    console.error("Erreur lors de l'ajout de la permission au rôle", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
+/**
+ * Retire une permission d'un rôle
+ * @param {Object} req.body - Les données de dissociation
+ * @param {string} req.body.roleId - L'ID du rôle
+ * @param {string} req.body.permissionSlug - Le slug de la permission à retirer
+ */
+exports.removePermissionFromRole = async (req, res) => {
+  const { roleId, permissionSlug } = req.body;
+
+  try {
+    const role = await Role.findByPk(roleId);
+    if (!role) {
+      return res.status(404).json({ message: "Rôle non trouvé" });
+    }
+
+    const permission = await Permission.findOne({ where: { slug: permissionSlug } });
+    if (!permission) {
+      return res.status(404).json({ message: "Permission non trouvée" });
+    }
+
+    await role.removePermission(permission);
+    res.status(200).json({ message: `Permission ${permissionSlug} retirée du rôle` });
+  } catch (error) {
+    console.error("Erreur lors du retrait de la permission du rôle", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
+/**
+ * Récupère tous les rôles avec leurs permissions
+ * @returns {Object[]} Liste des rôles avec leurs permissions associées
+ */
 exports.getRoles = async (req, res) => {
   try {
-    // Récupère tous les rôles, y compris leurs permissions associées
     const roles = await Role.findAll({
       include: {
         model: Permission,
-        through: { attributes: [] }, // Exclut les attributs de la table de jointure
+        through: { attributes: [] },
       },
     });
 
@@ -47,6 +110,11 @@ exports.getRoles = async (req, res) => {
   }
 };
 
+/**
+ * Récupère un rôle par son ID
+ * @param {string} req.params.id - L'ID du rôle
+ * @returns {Object} Le rôle avec ses permissions
+ */
 exports.getRoleById = async (req, res) => {
   const { id } = req.params;
 
@@ -54,7 +122,7 @@ exports.getRoleById = async (req, res) => {
     const role = await Role.findByPk(id, {
       include: {
         model: Permission,
-        through: { attributes: [] }, // Exclut les attributs de la table de jointure
+        through: { attributes: [] },
       },
     });
 
@@ -69,6 +137,11 @@ exports.getRoleById = async (req, res) => {
   }
 };
 
+/**
+ * Récupère toutes les permissions d'un rôle
+ * @param {string} req.params.id - L'ID du rôle
+ * @returns {Object[]} Liste des permissions du rôle
+ */
 exports.getPermissions = async (req, res) => {
   const { id } = req.params;
 
@@ -91,6 +164,12 @@ exports.getPermissions = async (req, res) => {
   }
 };
 
+/**
+ * Met à jour les informations d'un rôle
+ * @param {string} req.params.id - L'ID du rôle
+ * @param {string} req.body.name - Le nouveau nom du rôle
+ * @returns {Object} Le rôle mis à jour
+ */
 exports.updateRole = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
@@ -102,7 +181,6 @@ exports.updateRole = async (req, res) => {
       return res.status(404).json({ message: "Rôle non trouvé" });
     }
 
-    // Vérifie si un autre rôle avec le même nom existe déjà
     if (name) {
       const existingRole = await Role.findOne({ where: { name } });
       if (existingRole && existingRole.id !== role.id) {
@@ -120,7 +198,10 @@ exports.updateRole = async (req, res) => {
   }
 };
 
-
+/**
+ * Supprime un rôle
+ * @param {string} req.params.id - L'ID du rôle
+ */
 exports.deleteRole = async (req, res) => {
   const { id } = req.params;
 
@@ -135,52 +216,6 @@ exports.deleteRole = async (req, res) => {
     res.status(200).json({ message: "Rôle supprimé" });
   } catch (error) {
     console.error("Erreur lors de la suppression du rôle", error);
-    res.status(500).json({ message: "Erreur serveur", error });
-  }
-};
-
-exports.addPermissionToRole = async (req, res) => {
-  const { roleId, permissionSlug } = req.body;
-
-  try {
-    const role = await Role.findByPk(roleId);
-    if (!role) {
-      return res.status(404).json({ message: "Rôle non trouvé" });
-    }
-
-    const permission = await Permission.findOne({ where: { slug: permissionSlug } });
-    if (!permission) {
-      return res.status(404).json({ message: "Permission non trouvée" });
-    }
-
-    // Ajouter la permission au rôle
-    await role.addPermission(permission);
-    res.status(200).json({ message: `Permission ${permissionSlug} ajoutée au rôle` });
-  } catch (error) {
-    console.error("Erreur lors de l'ajout de la permission au rôle", error);
-    res.status(500).json({ message: "Erreur serveur", error });
-  }
-};
-
-exports.removePermissionFromRole = async (req, res) => {
-  const { roleId, permissionSlug } = req.body;
-
-  try {
-    const role = await Role.findByPk(roleId);
-    if (!role) {
-      return res.status(404).json({ message: "Rôle non trouvé" });
-    }
-
-    const permission = await Permission.findOne({ where: { slug: permissionSlug } });
-    if (!permission) {
-      return res.status(404).json({ message: "Permission non trouvée" });
-    }
-
-    // Retirer la permission du rôle
-    await role.removePermission(permission);
-    res.status(200).json({ message: `Permission ${permissionSlug} retirée du rôle` });
-  } catch (error) {
-    console.error("Erreur lors du retrait de la permission du rôle", error);
     res.status(500).json({ message: "Erreur serveur", error });
   }
 };
