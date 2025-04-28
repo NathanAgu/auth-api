@@ -69,6 +69,28 @@ exports.getRoleById = async (req, res) => {
   }
 };
 
+exports.getPermissions = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const role = await Role.findByPk(id, {
+      include: {
+        model: Permission,
+        through: { attributes: [] }
+      }
+    });
+
+    if (!role) {
+      return res.status(404).json({ message: "Rôle non trouvé" });
+    }
+
+    res.status(200).json(role.Permissions);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des permissions du rôle :", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+};
+
 exports.updateRole = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;

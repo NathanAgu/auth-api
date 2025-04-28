@@ -1,5 +1,5 @@
 const express = require("express");
-const { createRole, getRoles, getRoleById, updateRole, deleteRole, addPermissionToRole, removePermissionFromRole } = require("../controllers/roleController");
+const { createRole, getRoles, getRoleById, getPermissions, updateRole, deleteRole, addPermissionToRole, removePermissionFromRole } = require("../controllers/roleController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const checkPermission = require("../middlewares/checkPermission");
 
@@ -13,6 +13,9 @@ router.get("/", authMiddleware, getRoles);
 
 // Récupération d'un rôle par ID
 router.get("/:id", authMiddleware, getRoleById);
+
+// Récupération des permissions d'un rôle
+router.get("/:id/permissions", authMiddleware, getPermissions);
 
 // Mise à jour d'un rôle (protégée par un rôle/admin)
 router.put("/:id", updateRole);
