@@ -1,5 +1,5 @@
 const express = require("express");
-const { createUser, getUser, updateUserInfo, updateUserPassword, deleteUser, addRoleToUser, removeRoleFromUser } = require("../controllers/userController");
+const { createUser, getUser, getRoles, updateUserInfo, updateUserPassword, deleteUser, addRoleToUser, removeRoleFromUser } = require("../controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const checkPermission = require("../middlewares/checkPermission");
 
@@ -10,6 +10,9 @@ router.post("/", authMiddleware, /*checkPermission("user:create"),*/ createUser)
 
 // Récupération d'un utilisateur
 router.get("/:id", authMiddleware, getUser);
+
+// Récupération des rôles d'un utilisateur (protégée par un rôle/admin)
+router.get("/:id/roles", getRoles);
 
 // Mise à jour des informations d'un utilisateur (protégée par un rôle/admin)
 router.put("/:id", updateUserInfo);

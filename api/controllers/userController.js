@@ -6,8 +6,12 @@ exports.createUser = async (req, res) => {
   
   const hashedPassword = await bcryptjs.hash(password, 10);
   try {
-    const newUser = await User.create({ username, hashedPassword });
-    res.status(201).json(newUser);
+    const newUser = await User.create({ username, password: hashedPassword });
+    
+    const userWithoutPassword = newUser.toJSON();
+    delete userWithoutPassword.password;
+
+    res.status(201).json(userWithoutPassword);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la création de l'utilisateur", error });
   }
@@ -34,6 +38,28 @@ exports.getUser = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la récupération de l'utilisateur", error });
+  }
+};
+
+exports.getRoles = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findByPk(id, {
+      include: {
+        model: Role,
+        through: { attributes: [] }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+
+    res.status(200).json(user.Roles);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des rôles de l'utilisateur", error);
+    res.status(500).json({ message: "Erreur serveur", error });
   }
 };
 
