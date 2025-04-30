@@ -34,7 +34,7 @@ const router = express.Router();
  */
 router.post("/", 
     authMiddleware, 
-    // checkPermission("users:create"), 
+    checkPermission("users:create"), 
     createUser
 );
 
@@ -52,7 +52,7 @@ router.post("/",
  */
 router.get("/:id", 
     authMiddleware, 
-    // checkPermission("users:read"), 
+    checkPermission("users:read"), 
     getUser
 );
 
@@ -70,7 +70,7 @@ router.get("/:id",
  */
 router.get("/:id/roles", 
     authMiddleware, 
-    // checkPermission("users:read"), 
+    checkPermission("users:read"), 
     getRoles
 );
 
@@ -90,7 +90,7 @@ router.get("/:id/roles",
  */
 router.put("/:id", 
     authMiddleware,
-    // checkPermission("users:update"), 
+    checkPermission("users:update"), 
     updateUserInfo
 );
 
@@ -110,7 +110,7 @@ router.put("/:id",
  */
 router.put("/:id/password", 
     authMiddleware,
-    // checkPermission("users:update"), 
+    checkPermission("users:update"), 
     updateUserPassword
 );
 
@@ -128,7 +128,7 @@ router.put("/:id/password",
  */
 router.delete("/:id", 
     authMiddleware, 
-    // checkPermission("users:delete"), 
+    checkPermission("users:delete"), 
     deleteUser
 );
 
@@ -148,7 +148,7 @@ router.delete("/:id",
  */
 router.post("/addRole", 
     authMiddleware, 
-    // checkPermission("users:update"), 
+    checkPermission("users:update"), 
     addRoleToUser
 );
 
@@ -168,7 +168,7 @@ router.post("/addRole",
  */
 router.post("/removeRole", 
     authMiddleware, 
-    // checkPermission("users:update"), 
+    checkPermission("users:update"), 
     removeRoleFromUser
 );
 

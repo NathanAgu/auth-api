@@ -4,7 +4,7 @@ const bcryptjs = require("bcryptjs");
 const initializeDatabase = async () => {
   try {
     const tables = ["users", "roles", "permissions"];
-    const actions = ["create", "update", "delete"];
+    const actions = ["create", "update", "delete", "read"];
 
     const permissionsData = tables.flatMap((table) =>
       actions.map((action) => ({

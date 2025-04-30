@@ -31,7 +31,7 @@ const router = express.Router();
  */
 router.post("/", 
     authMiddleware, 
-    // checkPermission("permissions:create"), 
+    checkPermission("permissions:create"), 
     createPermission
 );
 
@@ -49,7 +49,7 @@ router.post("/",
  */
 router.get("/", 
     authMiddleware, 
-    // checkPermission("permissions:read"), 
+    checkPermission("permissions:read"), 
     getPermissions
 );
 
@@ -67,7 +67,7 @@ router.get("/",
  */
 router.get("/:id", 
     authMiddleware, 
-    // checkPermission("permissions:read"), 
+    checkPermission("permissions:read"), 
     getPermissionById
 );
 
@@ -88,7 +88,7 @@ router.get("/:id",
  */
 router.put("/:id", 
     authMiddleware, 
-    // checkPermission("permissions:update"), 
+    checkPermission("permissions:update"), 
     updatePermission
 );
 
@@ -106,7 +106,7 @@ router.put("/:id",
  */
 router.delete("/:id", 
     authMiddleware, 
-    // checkPermission("permissions:delete"), 
+    checkPermission("permissions:delete"), 
     deletePermission
 );
 
